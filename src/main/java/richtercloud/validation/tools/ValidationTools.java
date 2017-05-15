@@ -34,6 +34,8 @@ public class ValidationTools {
      * @param instance the instance which causes the constaint violation(s)
      * @param fieldRetriever the field retriever to use to enhance the message
      * with field information
+     * @param html whether or not to include HTML (e.g. for multiline Swing
+     * labels) in the return value
      * @return the built message
      */
     /*
@@ -45,10 +47,18 @@ public class ValidationTools {
     public static String buildConstraintVioloationMessage(Set<ConstraintViolation<?>> violations,
             Object instance,
             FieldRetriever fieldRetriever,
-            FieldNameLambda fieldNameLambda) {
+            FieldNameLambda fieldNameLambda,
+            boolean html) {
         StringBuilder messageBuilder = new StringBuilder(1000);
-        messageBuilder.append("<html>");
-        messageBuilder.append("The following constraints are violated:<br/>");
+        if(html) {
+            messageBuilder.append("<html>");
+        }
+        messageBuilder.append("The following constraints are violated:");
+        if(html) {
+            messageBuilder.append("<br/>");
+        }else {
+            messageBuilder.append("\n");
+        }
         for(ConstraintViolation<?> violation : violations) {
             String propertyPath = violation.getPropertyPath().toString();
             List<String> propertyPathSplit = new LinkedList<>(Arrays.asList(propertyPath.split("\\."))); //an empty string causes a list with "" to be returned by "".split("\\."") (not necessarily intuitive)
@@ -95,10 +105,16 @@ public class ValidationTools {
                 }
             }
             messageBuilder.append(violation.getMessage());
-            messageBuilder.append("<br/>");
+            if(html) {
+                messageBuilder.append("<br/>");
+            }else {
+                messageBuilder.append("\n");
+            }
         }
         messageBuilder.append("Fix the corresponding values in the components.");
-        messageBuilder.append("</html>");
+        if(html) {
+            messageBuilder.append("</html>");
+        }
         String message = messageBuilder.toString();
         return message;
     }
