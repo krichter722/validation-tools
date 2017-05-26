@@ -44,6 +44,8 @@ public interface FieldRetriever {
      * implementation.
      *
      * @param clazz
+     * @throws FieldRetrievalException if any exception occurs during the
+     * retrieval of fields
      * @return the list of relevant field as specified by implementation,
      * never {@code null}
      */
@@ -52,5 +54,5 @@ public interface FieldRetriever {
      - return a List in order to be able to modify order (it's nice to have
      @Id annotated property first)
      */
-    List<Field> retrieveRelevantFields(Class<?> clazz);
+    List<Field> retrieveRelevantFields(Class<?> clazz) throws FieldRetrievalException;
 }

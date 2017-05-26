@@ -24,9 +24,12 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 import richtercloud.validation.tools.annotations.Skip;
 
 /**
+ * A thread-safe implementation of {@link FieldRetriever} caching previously
+ * requested results.
  *
  * @author richter
  */
@@ -36,6 +39,7 @@ public class CachedFieldRetriever implements FieldRetriever {
      * }.
      */
     private Map<Class<?>, List<Field>> relevantFieldsCache = new HashMap<>();
+    private Semaphore semaphore = new Semaphore(1);
 
     /**
      * Recursively retrieves all fields from the inheritance hierachy of
@@ -49,46 +53,55 @@ public class CachedFieldRetriever implements FieldRetriever {
      * @return
      */
     @Override
-    public List<Field> retrieveRelevantFields(Class<?> clazz) {
+    public List<Field> retrieveRelevantFields(Class<?> clazz) throws FieldRetrievalException {
         if (clazz == null) {
             throw new IllegalArgumentException("clazz mustn't be null");
         }
-        List<Field> retValueCandidate = this.relevantFieldsCache.get(clazz);
-        if (retValueCandidate != null) {
-            return new LinkedList<>(retValueCandidate); //return a copy in order to avoid ConcurrentModificationException
-        }
         List<Field> retValue = new LinkedList<>();
-        Class<?> hierarchyPointer = clazz;
-        while (hierarchyPointer != null //Class.getSuperclass returns null for topmost interface
-                && !hierarchyPointer.equals(Object.class)) {
-            retValue.addAll(Arrays.asList(hierarchyPointer.getDeclaredFields()));
-            hierarchyPointer = hierarchyPointer.getSuperclass();
+        try {
+            try {
+                semaphore.acquire();
+            } catch (InterruptedException ex) {
+                throw new FieldRetrievalException(ex);
+            }
+            List<Field> retValueCandidate = this.relevantFieldsCache.get(clazz);
+            if (retValueCandidate != null) {
+                return new LinkedList<>(retValueCandidate); //return a copy in order to avoid ConcurrentModificationException
+            }
+            Class<?> hierarchyPointer = clazz;
+            while (hierarchyPointer != null //Class.getSuperclass returns null for topmost interface
+                    && !hierarchyPointer.equals(Object.class)) {
+                retValue.addAll(Arrays.asList(hierarchyPointer.getDeclaredFields()));
+                hierarchyPointer = hierarchyPointer.getSuperclass();
+            }
+            Set<Field> seenEntityClassFields = new HashSet<>();
+            ListIterator<Field> entityClassFieldsIt = retValue.listIterator();
+            while (entityClassFieldsIt.hasNext()) {
+                Field entityClassFieldsNxt = entityClassFieldsIt.next();
+                if (Modifier.isStatic(entityClassFieldsNxt.getModifiers())) {
+                    entityClassFieldsIt.remove();
+                    continue;
+                }
+                if (Modifier.isTransient(entityClassFieldsNxt.getModifiers())) {
+                    entityClassFieldsIt.remove();
+                    continue;
+                }
+                if (seenEntityClassFields.contains(entityClassFieldsNxt)) {
+                    entityClassFieldsIt.remove();
+                    continue;
+                }
+                Skip entityClassFieldNxtSkip = entityClassFieldsNxt.getAnnotation(Skip.class);
+                if(entityClassFieldNxtSkip != null) {
+                    entityClassFieldsIt.remove();
+                    continue;
+                }
+                seenEntityClassFields.add(entityClassFieldsNxt);
+                entityClassFieldsNxt.setAccessible(true);
+            }
+            this.relevantFieldsCache.put(clazz, retValue);
+        }finally {
+            semaphore.release();
         }
-        Set<Field> seenEntityClassFields = new HashSet<>();
-        ListIterator<Field> entityClassFieldsIt = retValue.listIterator();
-        while (entityClassFieldsIt.hasNext()) {
-            Field entityClassFieldsNxt = entityClassFieldsIt.next();
-            if (Modifier.isStatic(entityClassFieldsNxt.getModifiers())) {
-                entityClassFieldsIt.remove();
-                continue;
-            }
-            if (Modifier.isTransient(entityClassFieldsNxt.getModifiers())) {
-                entityClassFieldsIt.remove();
-                continue;
-            }
-            if (seenEntityClassFields.contains(entityClassFieldsNxt)) {
-                entityClassFieldsIt.remove();
-                continue;
-            }
-            Skip entityClassFieldNxtSkip = entityClassFieldsNxt.getAnnotation(Skip.class);
-            if(entityClassFieldNxtSkip != null) {
-                entityClassFieldsIt.remove();
-                continue;
-            }
-            seenEntityClassFields.add(entityClassFieldsNxt);
-            entityClassFieldsNxt.setAccessible(true);
-        }
-        this.relevantFieldsCache.put(clazz, retValue);
         return retValue;
     }
 }
