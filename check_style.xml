@@ -83,5 +83,8 @@
             <property name="message" value="Trailing whitespace"/>
         </module>
         <module name="UnusedImports"/>
+        <module name="ImportOrder">
+            <property name="option" value="inflow"/>
+        </module>
     </module>
 </module>
