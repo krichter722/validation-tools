@@ -40,8 +40,8 @@ public interface FieldRetriever {
 
     /**
      * Retrieves relevant fields of {@code clazz}. What that means (especially
-     * whether superclass' fields ought to be included) in up to the
-     * implementation.
+     * the order of the list or whether superclass' fields ought to be included)
+     * is up to the implementation.
      *
      * @param clazz
      * @throws FieldRetrievalException if any exception occurs during the
