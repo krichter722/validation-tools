@@ -48,7 +48,7 @@ public class ValidationTools {
             Object instance,
             FieldRetriever fieldRetriever,
             FieldNameLambda fieldNameLambda,
-            boolean html) throws FieldRetrievalException {
+            boolean html) {
         StringBuilder messageBuilder = new StringBuilder(1000);
         if(html) {
             messageBuilder.append("<html>");

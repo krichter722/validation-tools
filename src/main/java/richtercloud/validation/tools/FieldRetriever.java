@@ -39,13 +39,11 @@ below 50.
 public interface FieldRetriever {
 
     /**
-     * Retrieves relevant fields of {@code clazz}. What that means (especially
-     * the order of the list or whether superclass' fields ought to be included)
-     * is up to the implementation.
+     * Retrieves relevant fields of {@code clazz}.What that means (especially
+ the order of the list or whether superclass' fields ought to be included)
+ is up to the implementation.
      *
      * @param clazz
-     * @throws FieldRetrievalException if any exception occurs during the
-     * retrieval of fields
      * @return the list of relevant field as specified by implementation,
      * never {@code null}
      */
@@ -54,5 +52,5 @@ public interface FieldRetriever {
      - return a List in order to be able to modify order (it's nice to have
      @Id annotated property first)
      */
-    List<Field> retrieveRelevantFields(Class<?> clazz) throws FieldRetrievalException;
+    List<Field> retrieveRelevantFields(Class<?> clazz);
 }

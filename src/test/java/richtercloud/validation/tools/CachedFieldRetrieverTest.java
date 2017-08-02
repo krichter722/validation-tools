@@ -35,7 +35,7 @@ public class CachedFieldRetrieverTest {
      */
     @Test
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
-    public void testRetrieveRelevantFields() throws NoSuchFieldException, FieldRetrievalException {
+    public void testRetrieveRelevantFields() throws NoSuchFieldException {
         Class<?> entityClass = TestEntity.class;
         CachedFieldRetriever instance = new CachedFieldRetriever();
         List<Field> expResult = new LinkedList<>(Arrays.asList(TestEntity.class.getDeclaredField("a"), TestEntity.class.getDeclaredField("m")));

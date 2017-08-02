@@ -24,7 +24,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import richtercloud.validation.tools.annotations.Skip;
 
 /**
@@ -38,8 +39,9 @@ public class CachedFieldRetriever implements FieldRetriever {
      * A cache for return values of {@link #retrieveRelevantFields(java.lang.Class)
      * }.
      */
-    private Map<Class<?>, List<Field>> relevantFieldsCache = new HashMap<>();
-    private Semaphore semaphore = new Semaphore(1);
+    private final Map<Class<?>, List<Field>> relevantFieldsCache = new HashMap<>();
+    private final Lock cacheLock = new ReentrantLock(true //fair
+    );
 
     /**
      * Recursively retrieves all fields from the inheritance hierachy of
@@ -53,17 +55,13 @@ public class CachedFieldRetriever implements FieldRetriever {
      * @return
      */
     @Override
-    public List<Field> retrieveRelevantFields(Class<?> clazz) throws FieldRetrievalException {
+    public List<Field> retrieveRelevantFields(Class<?> clazz) {
         if (clazz == null) {
             throw new IllegalArgumentException("clazz mustn't be null");
         }
         List<Field> retValue = new LinkedList<>();
         try {
-            try {
-                semaphore.acquire();
-            } catch (InterruptedException ex) {
-                throw new FieldRetrievalException(ex);
-            }
+            cacheLock.lock();
             List<Field> retValueCandidate = this.relevantFieldsCache.get(clazz);
             if (retValueCandidate != null) {
                 return new LinkedList<>(retValueCandidate); //return a copy in order to avoid ConcurrentModificationException
@@ -100,7 +98,7 @@ public class CachedFieldRetriever implements FieldRetriever {
             }
             this.relevantFieldsCache.put(clazz, retValue);
         }finally {
-            semaphore.release();
+            cacheLock.unlock();
         }
         return retValue;
     }
