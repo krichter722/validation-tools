@@ -35,11 +35,26 @@ import richtercloud.validation.tools.annotations.Skip;
  * @author richter
  */
 public class CachedFieldRetriever implements FieldRetriever {
+
+    public static List<Class<?>> generateInheritanceHierarchy(Class<?> entityClass) {
+        List<Class<?>> retValue = new LinkedList<>();
+        Class<?> hierarchyPointer = entityClass;
+        while (hierarchyPointer != null //Class.getSuperclass returns null for topmost interface
+                && !hierarchyPointer.equals(Object.class)) {
+            retValue.add(hierarchyPointer);
+            hierarchyPointer = hierarchyPointer.getSuperclass();
+        }
+        return retValue;
+    }
+
     /**
      * A cache for return values of {@link #retrieveRelevantFields(java.lang.Class)
      * }.
      */
     private final Map<Class<?>, List<Field>> relevantFieldsCache = new HashMap<>();
+    /**
+     * Avoids multiple generations of the same cache value.
+     */
     private final Lock cacheLock = new ReentrantLock(true //fair
     );
 
@@ -66,11 +81,9 @@ public class CachedFieldRetriever implements FieldRetriever {
             if (retValueCandidate != null) {
                 return new LinkedList<>(retValueCandidate); //return a copy in order to avoid ConcurrentModificationException
             }
-            Class<?> hierarchyPointer = clazz;
-            while (hierarchyPointer != null //Class.getSuperclass returns null for topmost interface
-                    && !hierarchyPointer.equals(Object.class)) {
-                retValue.addAll(Arrays.asList(hierarchyPointer.getDeclaredFields()));
-                hierarchyPointer = hierarchyPointer.getSuperclass();
+            List<Class<?>> hierarchyClasses = generateInheritanceHierarchy(clazz);
+            for(Class<?> hierarchyClass : hierarchyClasses) {
+                retValue.addAll(Arrays.asList(hierarchyClass.getDeclaredFields()));
             }
             Set<Field> seenEntityClassFields = new HashSet<>();
             ListIterator<Field> entityClassFieldsIt = retValue.listIterator();
@@ -101,5 +114,16 @@ public class CachedFieldRetriever implements FieldRetriever {
             cacheLock.unlock();
         }
         return retValue;
+    }
+
+    protected void overwriteCachedResult(Class<?> entityClass,
+            List<Field> relevantFields) {
+        try {
+            cacheLock.lock();
+            relevantFieldsCache.put(entityClass,
+                    relevantFields);
+        }finally {
+            cacheLock.unlock();
+        }
     }
 }

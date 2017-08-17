@@ -46,4 +46,12 @@ public class CachedFieldRetrieverTest {
         result = instance.retrieveRelevantFields(entityClass);
         assertEquals(new HashSet<>(expResult), new HashSet<>(result)); //ReflectionFormBuilder doesn't give any guarantees about the order of returned fields
     }
+
+    @Test
+    public void testGenerateInheritanceHierarchy() {
+        List<Class<?>> expResult = new LinkedList<>(Arrays.asList(HierarchySubclass.class,
+                HierarchySuperclass.class));
+        List<Class<?>> result = CachedFieldRetriever.generateInheritanceHierarchy(HierarchySubclass.class);
+        assertEquals(expResult, result);
+    }
 }
