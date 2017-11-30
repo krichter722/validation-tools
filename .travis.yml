@@ -5,7 +5,7 @@ jdk:
 # `openjdk8` not available; Java 7 not supported because of lambda expressions
 
 install:
-- git clone https://github.com/krichter722/maven-parent && cd maven-parent && mvn install && cd ..
+- git clone --recursive https://github.com/krichter722/maven-parent && cd maven-parent && mvn install && cd ..
 
 script:
 - mvn install -DskipTests=true -Dmaven.javadoc.skip=true --batch-mode --show-version
