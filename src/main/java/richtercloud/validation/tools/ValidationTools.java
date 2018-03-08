@@ -57,7 +57,7 @@ public class ValidationTools {
         if(html) {
             messageBuilder.append("<br/>");
         }else {
-            messageBuilder.append("\n");
+            messageBuilder.append('\n');
         }
         for(ConstraintViolation<?> violation : violations) {
             String propertyPath = violation.getPropertyPath().toString();
@@ -108,7 +108,7 @@ public class ValidationTools {
             if(html) {
                 messageBuilder.append("<br/>");
             }else {
-                messageBuilder.append("\n");
+                messageBuilder.append('\n');
             }
         }
         messageBuilder.append("Fix the corresponding values in the components.");
