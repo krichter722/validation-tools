@@ -1,3 +1,6 @@
 [submodule "checkstyle-config"]
 	path = checkstyle-config
 	url = https://gitlab.com/krichter/checkstyle-config-gplv3.git
+[submodule "code-analysis"]
+	path = code-analysis
+	url = https://github.com/krichter722/code-analysis.git
