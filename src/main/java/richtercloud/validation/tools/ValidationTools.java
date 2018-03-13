@@ -119,6 +119,18 @@ public class ValidationTools {
         return message;
     }
 
+    public static String buildConstraintVioloationMessage(Set<ConstraintViolation<?>> violations,
+            Object instance,
+            FieldRetriever fieldRetriever,
+            boolean html) {
+        String retValue = buildConstraintVioloationMessage(violations,
+                instance,
+                fieldRetriever,
+            field -> field.getName(),
+                html);
+        return retValue;
+    }
+
     private ValidationTools() {
     }
 }
