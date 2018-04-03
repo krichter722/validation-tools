@@ -48,13 +48,16 @@ public class ValidationTools {
             Object instance,
             FieldRetriever fieldRetriever,
             FieldNameLambda fieldNameLambda,
-            boolean html) {
+            OutputMode outputMode) {
         StringBuilder messageBuilder = new StringBuilder(1000);
-        if(html) {
+        if(outputMode == OutputMode.HTML_HTML) {
             messageBuilder.append("<html>");
+        }else if(outputMode == OutputMode.HTML_DIV) {
+            messageBuilder.append("<div>");
         }
         messageBuilder.append("The following constraints are violated:");
-        if(html) {
+        if(outputMode == OutputMode.HTML_HTML
+                || outputMode == OutputMode.HTML_DIV) {
             messageBuilder.append("<br/>");
         }else {
             messageBuilder.append('\n');
@@ -105,15 +108,18 @@ public class ValidationTools {
                 }
             }
             messageBuilder.append(violation.getMessage());
-            if(html) {
+            if(outputMode == OutputMode.HTML_HTML
+                    || outputMode == OutputMode.HTML_DIV) {
                 messageBuilder.append("<br/>");
             }else {
                 messageBuilder.append('\n');
             }
         }
         messageBuilder.append("Fix the corresponding values in the components.");
-        if(html) {
+        if(outputMode == OutputMode.HTML_HTML) {
             messageBuilder.append("</html>");
+        }else if(outputMode == OutputMode.HTML_DIV) {
+            messageBuilder.append("</div>");
         }
         String message = messageBuilder.toString();
         return message;
@@ -122,12 +128,12 @@ public class ValidationTools {
     public static String buildConstraintVioloationMessage(Set<ConstraintViolation<?>> violations,
             Object instance,
             FieldRetriever fieldRetriever,
-            boolean html) {
+            OutputMode outputMode) {
         String retValue = buildConstraintVioloationMessage(violations,
                 instance,
                 fieldRetriever,
             field -> field.getName(),
-                html);
+                outputMode);
         return retValue;
     }
 
