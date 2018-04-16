@@ -12,11 +12,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package richtercloud.validation.tools;
+package richtercloud.validation.tools.validator;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
 /**
  *
  * @author richter
  */
-public class HierarchySuperclass implements HierarchyInterface {
+public class Bean0Validator implements ConstraintValidator<ValidBean0, Bean0> {
+    /**
+     * Needs to be private and set through mocking once this is figured out in
+     * PBT in order to allow parallel execution.
+     */
+    private boolean retValue = true;
+
+    @Override
+    public void initialize(ValidBean0 constraintAnnotation) {
+        //do nothing
+    }
+
+    @Override
+    public boolean isValid(Bean0 value, ConstraintValidatorContext context) {
+        return retValue;
+    }
 }

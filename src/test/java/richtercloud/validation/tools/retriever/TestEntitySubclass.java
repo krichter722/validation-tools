@@ -12,23 +12,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package richtercloud.validation.tools;
-
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+package richtercloud.validation.tools.retriever;
 
 /**
  *
  * @author richter
  */
-public class TestEntityCollection {
-    private String a = "a";
-    private List<Integer> bs = new LinkedList<>(Arrays.asList(1));
-//    private List<Set<Boolean>> gs = new LinkedList<Set<Boolean>>(Arrays.asList(new HashSet<>(Arrays.asList(Boolean.TRUE))));
-    private List<Boolean> gs = new LinkedList<>(Arrays.asList(Boolean.TRUE));
-    private List<TestEntity> testEntitys = new LinkedList<>(Arrays.asList(new TestEntity()));
+/*
+internal implementation notes:
+- needs to be a proper class in order to have a constructor in reflection API
+*/
+public class TestEntitySubclass extends TestEntity {
+    private String b = "bb";
 
-    public TestEntityCollection() {
+    TestEntitySubclass() {
     }
+
 }

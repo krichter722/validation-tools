@@ -12,24 +12,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package richtercloud.validation.tools;
+package richtercloud.validation.tools.validator;
 
-import javax.measure.quantity.Mass;
-import org.jscience.physics.amount.Amount;
+import static java.lang.annotation.ElementType.TYPE;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
+import javax.validation.Constraint;
+import javax.validation.Payload;
 
 /**
  *
  * @author richter
  */
-/*
-internal implementation notes:
-- needs to be a proper class in order to have a constructor in reflection API
-*/
-public class TestEntity {
-    private String a = "a";
-    private Amount<Mass> m;
+@Retention(RUNTIME)
+@Target({TYPE})
+@Constraint(validatedBy = Bean2Validator.class)
+public @interface ValidBean2 {
 
-    TestEntity() {
-    }
+    String message() default "invalid Bean2";
 
+    Class<?>[] groups() default {};
+
+    Class<? extends Payload>[] payload() default {};
 }

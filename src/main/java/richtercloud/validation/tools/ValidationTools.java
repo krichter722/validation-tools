@@ -14,12 +14,18 @@
  */
 package richtercloud.validation.tools;
 
+import com.google.common.collect.Lists;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.LinkedList;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
+import javax.validation.ElementKind;
+import javax.validation.Path;
+import javax.validation.Path.Node;
 
 /**
  *
@@ -34,8 +40,13 @@ public class ValidationTools {
      * @param instance the instance which causes the constaint violation(s)
      * @param fieldRetriever the field retriever to use to enhance the message
      * with field information
-     * @param html whether or not to include HTML (e.g. for multiline Swing
-     * labels) in the return value
+     * @param pathDescriptionMap allows to replace the description constructed
+     * from paths with customized messages
+     * @param fieldNameLambda allows to replace field names which are used in
+     * construction of the description with specified strings (has no effect if
+     * a description is found in {@code pathDescriptionMap})
+     * @param outputMode how to generate the output (see {@link OutputMode} for
+     * details
      * @return the built message
      */
     /*
@@ -47,8 +58,24 @@ public class ValidationTools {
     public static String buildConstraintVioloationMessage(Set<ConstraintViolation<?>> violations,
             Object instance,
             FieldRetriever fieldRetriever,
+            Map<Path, String> pathDescriptionMap,
             FieldNameLambda fieldNameLambda,
             OutputMode outputMode) {
+        if(violations == null) {
+            throw new IllegalArgumentException("violations mustn't be null");
+        }
+        if(violations.isEmpty()) {
+            throw new IllegalArgumentException("violations mustn't be empty");
+        }
+        if(fieldRetriever == null) {
+            throw new IllegalArgumentException("fieldRetriever mustn't be null");
+        }
+        if(fieldNameLambda == null) {
+            throw new IllegalArgumentException("fieldNameLambda mustn't be null");
+        }
+        if(outputMode == null) {
+            throw new IllegalArgumentException("outputMode mustn't be null");
+        }
         StringBuilder messageBuilder = new StringBuilder(1000);
         if(outputMode == OutputMode.HTML_HTML) {
             messageBuilder.append("<html>");
@@ -62,51 +89,85 @@ public class ValidationTools {
         }else {
             messageBuilder.append('\n');
         }
+        String pathString;
         for(ConstraintViolation<?> violation : violations) {
-            String propertyPath = violation.getPropertyPath().toString();
-            List<String> propertyPathSplit = new LinkedList<>(Arrays.asList(propertyPath.split("\\."))); //an empty string causes a list with "" to be returned by "".split("\\."") (not necessarily intuitive)
-            String fieldName = propertyPath;
-            //there's no way to retrieve information about the field or
-            //class on which the validation annotation has been specified
-            //-> retrieval of this information is done with the property
-            //path of the ConstraintViolation
-
-            //violations which occur at the class level of the root instance
-            //have an empty property path -> just display the message in a
-            //separate line
-            //note: both violations which occur at the root and at
-            //a property have a property path with 1 node (which doesn't
-            //necessarily make sense) -> there's no way to evaluate retrieve
-            //the field names if a nested violation occurs -> split
-            //propertyPath.toString() at `.`.
-            if(!propertyPath.isEmpty()) {
-                if(propertyPathSplit.size() > 1) {
-                    throw new IllegalArgumentException("Property path of violation is larger than 2 nodes. This isn't supported yet.");
-                }
-                if(!propertyPathSplit.isEmpty()) {
-                    //should be always true because it's already checked
-                    //that propertyPath.toString isn't empty, but check
-                    //nevertheless
-                    String violationFieldName = propertyPathSplit.get(0);
-                    Field violationField = null;
-                    List<Field> classFields = fieldRetriever.retrieveRelevantFields(instance.getClass());
-                    for(Field classField : classFields) {
-                        if(classField.getName().equals(violationFieldName)) {
-                            violationField = classField;
-                            break;
-                        }
+            pathString = pathDescriptionMap.get(violation.getPropertyPath());
+            if(pathString == null) {
+                StringBuilder pathStringBuilder = new StringBuilder(1024);
+                Class<?> relativeFieldRoot = instance.getClass();
+                List<Path.Node> propertyPathNodes = Lists.newArrayList(violation.getPropertyPath());
+                    //need a second view on property path because Node.isInIterable
+                    //is only true after descending into the collection
+                int index = 0;
+                for(Node propertyPathNode : violation.getPropertyPath()) {
+                    if(propertyPathNode.getKind() != ElementKind.PROPERTY
+                            && propertyPathNode.getKind() != ElementKind.BEAN) {
+                        throw new IllegalArgumentException(String.format("only "
+                                + "kinds %s and %s are supported",
+                                ElementKind.PROPERTY,
+                                ElementKind.BEAN));
                     }
-                    if(violationField == null) {
-                        throw new IllegalArgumentException("validation violoation constraint on field which isn't part of the validated instance");
+                    //both PropertyNode and BeanNode (subclasses of Node) don't
+                    //provide more information than Node
+                    Field violationField = null;
+                    if(propertyPathNode.getKind() == ElementKind.PROPERTY) {
+                        String violationFieldName = propertyPathNode.getName();
+                        List<Field> classFields = fieldRetriever.retrieveRelevantFields(relativeFieldRoot);
+                        for(Field classField : classFields) {
+                            if(classField.getName().equals(violationFieldName)) {
+                                violationField = classField;
+                                break;
+                            }
+                        }
+                        if(violationField == null) {
+                            throw new IllegalArgumentException("validation violoation constraint on field which isn't part of the validated instance");
+                        }
+                        if(index+1 < propertyPathNodes.size()) {
+                            if(!propertyPathNodes.get(index+1).isInIterable()) {
+                                relativeFieldRoot = violationField.getType();
+                            }else {
+                                //this can be handled well with Validation API 2.x which
+                                //requires Java EE 8 (assuming running a Java EE
+                                //environment) which is painful to setup on most
+                                //Java EE 8 servers
+                                if(!(violationField.getGenericType() instanceof ParameterizedType)) {
+                                    throw new IllegalArgumentException("all collections involving validation need to be parameterized");
+                                }
+                                ParameterizedType violationFieldParameterizedType = (ParameterizedType) violationField.getGenericType();
+                                if(violationFieldParameterizedType.getActualTypeArguments().length != 1) {
+                                    throw new IllegalArgumentException("only collections with one parameterized type are supported");
+                                }
+                                Type violoationFieldOnlyGenericType = violationFieldParameterizedType.getActualTypeArguments()[0];
+                                if(!(violoationFieldOnlyGenericType instanceof Class)) {
+                                    throw new IllegalArgumentException(String.format(
+                                            "the collection's parameterized type has "
+                                                    + "to be a class (as opposed to "
+                                                    + "other possibilites for generic "
+                                                    + "types) (was %s)",
+                                            violoationFieldOnlyGenericType));
+                                }
+                                relativeFieldRoot = (Class<?>) violoationFieldOnlyGenericType;
+                            }
+                        }
+                    }else if(propertyPathNode.getKind() == ElementKind.BEAN) {
+                        throw new UnsupportedOperationException("bean nodes in constraint violoation property path not yet supported");
                     }
                     String specialFieldName = fieldNameLambda.getFieldName(violationField);
+                    String fieldName;
                     if(specialFieldName != null) {
                         fieldName = specialFieldName;
+                    }else {
+                        fieldName = violationField.getName();
                     }
-                    messageBuilder.append(fieldName);
-                    messageBuilder.append(": ");
+                    pathStringBuilder.append(fieldName);
+                    pathStringBuilder.append(": ");
+                        //adding : between property names is fine and makes
+                        //descriptions appear nicer than when separated with .
+                    index += 1;
                 }
+                pathString = pathStringBuilder.toString();
             }
+            messageBuilder.append(pathString);
             messageBuilder.append(violation.getMessage());
             if(outputMode == OutputMode.HTML_HTML
                     || outputMode == OutputMode.HTML_DIV) {
@@ -128,10 +189,39 @@ public class ValidationTools {
     public static String buildConstraintVioloationMessage(Set<ConstraintViolation<?>> violations,
             Object instance,
             FieldRetriever fieldRetriever,
+            FieldNameLambda fieldNameLambda,
             OutputMode outputMode) {
         String retValue = buildConstraintVioloationMessage(violations,
                 instance,
                 fieldRetriever,
+                new HashMap<>(), //pathDescriptionMap
+                fieldNameLambda,
+                outputMode);
+        return retValue;
+    }
+
+    public static String buildConstraintVioloationMessage(Set<ConstraintViolation<?>> violations,
+            Object instance,
+            FieldRetriever fieldRetriever,
+            Map<Path, String> pathDescriptionMap,
+            OutputMode outputMode) {
+        String retValue = buildConstraintVioloationMessage(violations,
+                instance,
+                fieldRetriever,
+                pathDescriptionMap,
+            field -> field.getName(),
+                outputMode);
+        return retValue;
+    }
+
+    public static String buildConstraintVioloationMessage(Set<ConstraintViolation<?>> violations,
+            Object instance,
+            FieldRetriever fieldRetriever,
+            OutputMode outputMode) {
+        String retValue = buildConstraintVioloationMessage(violations,
+                instance,
+                fieldRetriever,
+                new HashMap<>(), //pathDescriptionMap
             field -> field.getName(),
                 outputMode);
         return retValue;

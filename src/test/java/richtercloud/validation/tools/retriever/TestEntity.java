@@ -12,11 +12,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package richtercloud.validation.tools;
+package richtercloud.validation.tools.retriever;
+
+import javax.measure.quantity.Mass;
+import org.jscience.physics.amount.Amount;
 
 /**
  *
  * @author richter
  */
-public class HierarchySubclass extends HierarchySuperclass {
+/*
+internal implementation notes:
+- needs to be a proper class in order to have a constructor in reflection API
+*/
+public class TestEntity {
+    private String a = "a";
+    private Amount<Mass> m;
+
+    TestEntity() {
+    }
+
 }

@@ -15,6 +15,10 @@
 
 package richtercloud.validation.tools;
 
+import richtercloud.validation.tools.retriever.TestEntitySubclass;
+import richtercloud.validation.tools.retriever.HierarchySubclass;
+import richtercloud.validation.tools.retriever.TestEntity;
+import richtercloud.validation.tools.retriever.HierarchySuperclass;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashSet;

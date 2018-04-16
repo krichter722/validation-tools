@@ -12,11 +12,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package richtercloud.validation.tools;
+package richtercloud.validation.tools.retriever;
 
 /**
  *
  * @author richter
  */
-public interface HierarchyInterface {
+public class HierarchySuperclass implements HierarchyInterface {
 }

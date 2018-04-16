@@ -12,20 +12,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package richtercloud.validation.tools;
+package richtercloud.validation.tools.validator;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
 /**
  *
  * @author richter
  */
-/*
-internal implementation notes:
-- needs to be a proper class in order to have a constructor in reflection API
-*/
-class TestEntitySubclass extends TestEntity {
-    private String b = "bb";
+public class Bean2Validator implements ConstraintValidator<ValidBean2, Bean2> {
+    /**
+     * Needs to be private and set through mocking once this is figured out in
+     * PBT in order to allow parallel execution.
+     */
+    private boolean retValue = true;
 
-    TestEntitySubclass() {
+    @Override
+    public void initialize(ValidBean2 constraintAnnotation) {
+        //do nothing
     }
 
+    @Override
+    public boolean isValid(Bean2 value, ConstraintValidatorContext context) {
+        return retValue;
+    }
 }
