@@ -149,21 +149,25 @@ public class ValidationTools {
                                 relativeFieldRoot = (Class<?>) violoationFieldOnlyGenericType;
                             }
                         }
-                    }else if(propertyPathNode.getKind() == ElementKind.BEAN) {
-                        throw new UnsupportedOperationException("bean nodes in constraint violoation property path not yet supported");
+                        String specialFieldName = fieldNameLambda.getFieldName(violationField);
+                        String fieldName;
+                        if(specialFieldName != null) {
+                            fieldName = specialFieldName;
+                        }else {
+                            fieldName = violationField.getName();
+                        }
+                        pathStringBuilder.append(fieldName);
+                        pathStringBuilder.append(": ");
+                            //adding : between property names is fine and makes
+                            //descriptions appear nicer than when separated with .
+                        index += 1;
                     }
-                    String specialFieldName = fieldNameLambda.getFieldName(violationField);
-                    String fieldName;
-                    if(specialFieldName != null) {
-                        fieldName = specialFieldName;
-                    }else {
-                        fieldName = violationField.getName();
-                    }
-                    pathStringBuilder.append(fieldName);
-                    pathStringBuilder.append(": ");
-                        //adding : between property names is fine and makes
-                        //descriptions appear nicer than when separated with .
-                    index += 1;
+                    //in case propertyPath.kind  == ElementKind.BEAN
+                    //do nothing since it's fine if either the leaf is a
+                    //leaf node with all previous pathes explaining the path
+                    //or the violoation refers to the root bean in which
+                    //case a message without path would be displayed which
+                    //is very comprehensive as well
                 }
                 pathString = pathStringBuilder.toString();
             }

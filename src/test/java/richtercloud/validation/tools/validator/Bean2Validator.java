@@ -23,10 +23,13 @@ import javax.validation.ConstraintValidatorContext;
  */
 public class Bean2Validator implements ConstraintValidator<ValidBean2, Bean2> {
     /**
-     * Needs to be private and set through mocking once this is figured out in
-     * PBT in order to allow parallel execution.
+     * Since PBT with jqwik are executed sequentially (as opposed to parallel)
+     * this is the simplest way to manipulate the validation result. Since
+     * PowerMockito doesn't work with JUnit 5 (which is required by jqwik) (see
+     * https://github.com/junit-team/junit5/issues/201 for details) it's
+     * the only way as well.
      */
-    private boolean retValue = true;
+    public static boolean retValue;
 
     @Override
     public void initialize(ValidBean2 constraintAnnotation) {

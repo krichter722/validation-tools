@@ -16,14 +16,19 @@ package richtercloud.validation.tools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import javax.validation.ConstraintViolation;
 import javax.validation.Path;
 import javax.validation.Validation;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.constraints.WithNull;
+import one.util.streamex.StreamEx;
+import org.apache.commons.collections4.iterators.PermutationIterator;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import org.hamcrest.Matcher;
@@ -33,8 +38,10 @@ import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import richtercloud.validation.tools.validator.Bean0;
+import richtercloud.validation.tools.validator.Bean0Validator;
 import richtercloud.validation.tools.validator.Bean1;
 import richtercloud.validation.tools.validator.Bean2;
+import richtercloud.validation.tools.validator.Bean2Validator;
 
 /**
  *
@@ -54,7 +61,7 @@ public class ValidationToolsTest {
             @ForAll boolean bean1bean2sEmpty,
             @ForAll @WithNull(0.5) String bean0Property0,
             @ForAll boolean bean0Valid,
-            @ForAll boolean bean2Valid) {
+            @ForAll boolean bean2Valid) throws Exception {
         LOGGER.info("testBuildConstraintVioloationMessage");
         LOGGER.trace("testBuildConstraintVioloationMessage bean2Null: {}",
                 bean2Null);
@@ -72,6 +79,8 @@ public class ValidationToolsTest {
                 bean0Valid);
         LOGGER.trace("testBuildConstraintVioloationMessage bean2Valid: {}",
                 bean2Valid);
+        Bean0Validator.retValue = bean0Valid;
+        Bean2Validator.retValue = bean2Valid;
         Bean2 bean2;
         if(bean2Null) {
             bean2 = null;
@@ -95,7 +104,7 @@ public class ValidationToolsTest {
             bean1 = new Bean1(bean1Bean2s);
         }
         Bean0 bean0 = new Bean0(bean1, bean0Property0);
-        Set violations = Validation.buildDefaultValidatorFactory().getValidator().validate(bean0);
+        Set<ConstraintViolation<Object>> violations = Validation.buildDefaultValidatorFactory().getValidator().validate(bean0);
         FieldRetriever fieldRetriever = new CachedFieldRetriever();
         FieldNameLambda fieldNameLambda = field -> "+++"+field.getName()+",,,";
         Map<Path, String> pathDescriptionMap = new HashMap<>();
@@ -112,87 +121,55 @@ public class ValidationToolsTest {
                         outputMode));
             return;
         }
-        Matcher<String> expResult = equalTo("");
+        Set<String> messages = new HashSet<>();
+        if(!bean0Valid) {
+            messages.add("invalid Bean0");
+        }
+        if(bean0Property0 == null) {
+            messages.add("+++property0,,,: darf nicht null sein");
+        }
         if(bean1Null) {
-            if(bean0Property0 == null) {
-                expResult = anyOf(equalTo("The following constraints are violated:\n" +
-                                "+++bean1,,,: darf nicht null sein\n" +
-                                "+++property0,,,: darf nicht null sein\n" +
-                                "Fix the corresponding values in the components."),
-                        equalTo("The following constraints are violated:\n" +
-                                "+++property0,,,: darf nicht null sein\n" +
-                                "+++bean1,,,: darf nicht null sein\n" +
-                                "Fix the corresponding values in the components."));
-            }else {
-                expResult = equalTo("The following constraints are violated:\n" +
-                        "+++bean1,,,: darf nicht null sein\n" +
-                        "Fix the corresponding values in the components.");
-            }
+            messages.add("+++bean1,,,: darf nicht null sein");
         }else {
-            if(bean0Property0 == null) {
-                if(bean1Bean2sNull) {
-                    expResult = equalTo("The following constraints are violated:\n" +
-                            "+++property0,,,: darf nicht null sein\n" +
-                            "Fix the corresponding values in the components.");
-                        //bean1bean2sNull is valid
-                }else {
-                    if(!bean1bean2sEmpty) {
-                        if(bean2Null) {
-                            expResult = equalTo("The following constraints are violated:\n" +
-                                    "+++property0,,,: darf nicht null sein\n" +
-                                    "Fix the corresponding values in the components.");
-                        }else {
-                            if(bean2Property0 < 1) {
-                                expResult = anyOf(equalTo("The following constraints are violated:\n" +
-                                                "+++bean1,,,: +++bean2s,,,: +++property0,,,: muss größer oder gleich 1 sein\n" +
-                                                "+++property0,,,: darf nicht null sein\n" +
-                                                "Fix the corresponding values in the components."),
-                                        equalTo("The following constraints are violated:\n" +
-                                                "+++property0,,,: darf nicht null sein\n" +
-                                                "+++bean1,,,: +++bean2s,,,: +++property0,,,: muss größer oder gleich 1 sein\n" +
-                                                "Fix the corresponding values in the components."));
-                            }else {
-                                expResult = equalTo("The following constraints are violated:\n" +
-                                        "+++property0,,,: darf nicht null sein\n" +
-                                        "Fix the corresponding values in the components.");
-                            }
+            if(!bean1Bean2sNull) {
+                //bean1bean2sNull is valid
+                if(!bean1bean2sEmpty) {
+                    if(!bean2Null) {
+                        if(!bean2Valid) {
+                            messages.add("+++bean1,,,: +++bean2s,,,: invalid Bean2");
                         }
-                    }else {
-                        expResult = anyOf(equalTo("The following constraints are violated:\n" +
-                                        "+++property0,,,: darf nicht null sein\n" +
-                                        "+++bean1,,,: +++bean2s,,,: Bean1.bean2s mustn't be empty\n" +
-                                        "Fix the corresponding values in the components."),
-                                equalTo("The following constraints are violated:\n" +
-                                        "+++bean1,,,: +++bean2s,,,: Bean1.bean2s mustn't be empty\n" +
-                                        "+++property0,,,: darf nicht null sein\n" +
-                                        "Fix the corresponding values in the components."));
+                        if(bean2Property0 < 1) {
+                            messages.add("+++bean1,,,: +++bean2s,,,: +++property0,,,: muss größer oder gleich 1 sein");
+                        }
                     }
-                }
-            }else {
-                if(bean1bean2sEmpty) {
-                    expResult = equalTo("The following constraints are violated:\n" +
-                                    "+++bean1,,,: +++bean2s,,,: Bean1.bean2s mustn't be empty\n" +
-                                    "Fix the corresponding values in the components.");
-                }else if(bean2Property0 < 1) {
-                    expResult = equalTo("The following constraints are violated:\n" +
-                                    "+++bean1,,,: +++bean2s,,,: +++property0,,,: muss größer oder gleich 1 sein\n" +
-                                    "Fix the corresponding values in the components.");
+                }else {
+                    messages.add("+++bean1,,,: +++bean2s,,,: Bean1.bean2s mustn't be empty");
                 }
             }
         }
+        Set<List<String>> permutations = new HashSet<>();
+        PermutationIterator<String> textsPermutationIterator = new PermutationIterator<>(messages);
+        textsPermutationIterator.forEachRemaining(permutation -> permutations.add(permutation));
+        Matcher<String> expResult = anyOf(permutations.stream()
+                .map(permutation -> equalTo(StreamEx.of(permutation)
+                        .joining("\n",
+                                "The following constraints are violated:\n",
+                                "\nFix the corresponding values in the components.")))
+                .collect(Collectors.toSet()));
         String result = ValidationTools.buildConstraintVioloationMessage(violations,
                 bean0,
                 fieldRetriever,
                 pathDescriptionMap,
                 fieldNameLambda,
                 outputMode);
-        assertTrue(String.format("result was: %s",
-                        result),
+        assertTrue(String.format("result was: %s; expResult was: %s",
+                        result,
+                        expResult),
                 expResult.matches(result));
     }
 
     @Test
-    public void testBuildConstraintVioloationMessageExample() {
+    public void testBuildConstraintVioloationMessageExample() throws Exception {
         LOGGER.info("testBuildConstraintVioloationMessageExample");
         testBuildConstraintVioloationMessage(false,
                 -1848689372,
