@@ -55,7 +55,7 @@ public class ValidationTools {
     ConstraintViolationException.getConstraintVioloations doesn't allow
     parameterization and returns Set<ConstraintViolation<?>>
     */
-    public static String buildConstraintVioloationMessage(Set<ConstraintViolation<?>> violations,
+    public static <T> String buildConstraintVioloationMessage(Set<ConstraintViolation<T>> violations,
             Object instance,
             FieldRetriever fieldRetriever,
             Map<Path, String> pathDescriptionMap,
@@ -186,7 +186,7 @@ public class ValidationTools {
         return message;
     }
 
-    public static String buildConstraintVioloationMessage(Set<ConstraintViolation<?>> violations,
+    public static <T> String buildConstraintVioloationMessage(Set<ConstraintViolation<T>> violations,
             Object instance,
             FieldRetriever fieldRetriever,
             FieldNameLambda fieldNameLambda,
@@ -200,7 +200,7 @@ public class ValidationTools {
         return retValue;
     }
 
-    public static String buildConstraintVioloationMessage(Set<ConstraintViolation<?>> violations,
+    public static <T> String buildConstraintVioloationMessage(Set<ConstraintViolation<T>> violations,
             Object instance,
             FieldRetriever fieldRetriever,
             Map<Path, String> pathDescriptionMap,
@@ -214,7 +214,7 @@ public class ValidationTools {
         return retValue;
     }
 
-    public static String buildConstraintVioloationMessage(Set<ConstraintViolation<?>> violations,
+    public static <T> String buildConstraintVioloationMessage(Set<ConstraintViolation<T>> violations,
             Object instance,
             FieldRetriever fieldRetriever,
             OutputMode outputMode) {
