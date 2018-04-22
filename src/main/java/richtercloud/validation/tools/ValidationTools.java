@@ -48,6 +48,10 @@ public class ValidationTools {
      * @param outputMode how to generate the output (see {@link OutputMode} for
      * details
      * @return the built message
+     * @throws IllegalArgumentException if either of {@code violations},
+     * {@code fieldRetriever}, {@code pathDescriptionMap},
+     * {@code fieldNameLambda} or {@code outputMode} is {@code null} or
+     * {@code violations} is empty
      */
     /*
     internal implementation notes:
@@ -69,6 +73,9 @@ public class ValidationTools {
         }
         if(fieldRetriever == null) {
             throw new IllegalArgumentException("fieldRetriever mustn't be null");
+        }
+        if(pathDescriptionMap == null) {
+            throw new IllegalArgumentException("pathDescriptionMap mustn't be null");
         }
         if(fieldNameLambda == null) {
             throw new IllegalArgumentException("fieldNameLambda mustn't be null");
