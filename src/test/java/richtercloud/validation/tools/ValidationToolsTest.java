@@ -118,6 +118,7 @@ public class ValidationToolsTest {
                         fieldRetriever,
                         pathDescriptionMap,
                         fieldNameLambda,
+                        false, //skipPathes
                         outputMode));
             return;
         }
@@ -161,6 +162,7 @@ public class ValidationToolsTest {
                 fieldRetriever,
                 pathDescriptionMap,
                 fieldNameLambda,
+                false, //skipPathes
                 outputMode);
         assertTrue(String.format("result was: %s; expResult was: %s",
                         result,
