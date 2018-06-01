@@ -33,10 +33,6 @@ import org.junit.Test;
  */
 public class CachedFieldRetrieverTest {
 
-    /**
-     * Test of retrieveRelevantFields method, of class ReflectionFormBuilder.
-     * @throws java.lang.NoSuchFieldException
-     */
     @Test
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void testRetrieveRelevantFields() throws NoSuchFieldException {

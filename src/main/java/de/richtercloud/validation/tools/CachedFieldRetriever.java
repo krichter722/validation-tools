@@ -66,8 +66,8 @@ public class CachedFieldRetriever implements FieldRetriever {
      * Results are cached in order to ensure that future calls return the same
      * result for the same argument value.
      *
-     * @param clazz
-     * @return
+     * @param clazz the class to retrieve for
+     * @return the list of retrieved fields
      */
     @Override
     public List<Field> retrieveRelevantFields(Class<?> clazz) {

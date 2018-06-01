@@ -36,24 +36,24 @@ public class ValidationTools {
     /**
      * Builds a useful message from multiple constraint violations
      * @param violations the detected constraint violations to build the message
-     * from
+     *     from
      * @param instance the instance which causes the constaint violation(s)
      * @param fieldRetriever the field retriever to use to enhance the message
-     * with field information
+     *     with field information
      * @param pathDescriptionMap allows to replace the description constructed
-     * from paths with customized messages
+     *     from paths with customized messages
      * @param fieldNameLambda allows to replace field names which are used in
-     * construction of the description with specified strings (has no effect if
-     * a description is found in {@code pathDescriptionMap})
+     *     construction of the description with specified strings (has no effect
+     *     if a description is found in {@code pathDescriptionMap})
      * @param skipPathes if {@code true} all pathes are omitted and violation
-     * messages only are written in a new line
+     *     messages only are written in a new line
      * @param outputMode how to generate the output (see {@link OutputMode} for
-     * details
+     *     details
      * @return the built message
      * @throws IllegalArgumentException if either of {@code violations},
-     * {@code fieldRetriever}, {@code pathDescriptionMap},
-     * {@code fieldNameLambda} or {@code outputMode} is {@code null} or
-     * {@code violations} is empty
+     *     {@code fieldRetriever}, {@code pathDescriptionMap},
+     *     {@code fieldNameLambda} or {@code outputMode} is {@code null} or
+     *     {@code violations} is empty
      */
     /*
     internal implementation notes:

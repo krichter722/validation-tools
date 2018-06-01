@@ -35,8 +35,8 @@ public class NoEmptyEntriesListValidator implements ConstraintValidator<NoEmptyE
      * @param value the value to check
      * @param context the context passed by the validation framework
      * @return {@code true} if {@code value} is {@code null} (in order to be
-     * able to combine with {@code @NotNull} or doesn't contain {@code null} or
-     * the empty string
+     *     able to combine with {@code @NotNull} or doesn't contain {@code null}
+     *     or the empty string
      */
     /*
     internal implementation notes:

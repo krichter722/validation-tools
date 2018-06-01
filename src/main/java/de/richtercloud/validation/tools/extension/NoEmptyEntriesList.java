@@ -22,6 +22,12 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
+/**
+ * Indicates that a {@link java.util.List} field must not contain the empty
+ * string or {@code null}.
+ *
+ * @author richter
+ */
 @Target( { ElementType.FIELD })
 @Retention(RUNTIME)
 @Constraint(validatedBy = NoEmptyEntriesListValidator.class)

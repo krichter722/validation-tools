@@ -17,14 +17,14 @@ package de.richtercloud.validation.tools.retriever;
 import javax.measure.quantity.Mass;
 import org.jscience.physics.amount.Amount;
 
-/**
- *
- * @author richter
- */
 /*
 internal implementation notes:
 - needs to be a proper class in order to have a constructor in reflection API
 */
+/**
+ *
+ * @author richter
+ */
 public class TestEntity {
     private String a = "a";
     private Amount<Mass> m;

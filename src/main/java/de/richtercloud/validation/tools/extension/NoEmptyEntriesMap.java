@@ -22,6 +22,12 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
+/**
+ * Indicates that a {@link java.util.Map} field must not contain keys or values
+ * which are the empty string or {@code null}.
+ *
+ * @author richter
+ */
 @Target( { ElementType.FIELD })
 @Retention(RUNTIME)
 @Constraint(validatedBy = NoEmptyEntriesMapValidator.class)

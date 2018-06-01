@@ -17,6 +17,13 @@ package de.richtercloud.validation.tools;
 import java.lang.reflect.Field;
 import java.util.List;
 
+/*
+internal implementation notes:
+- It's unlikely to avoid retrieving all fields in a superclass and then removing
+from them since that bloats up code complexity for the sake of saving a few
+comparisons - limited by a realistic number of class fields, i.e. most certainly
+below 50.
+*/
 /**
  * Handles order of relevant fields (e.g. JPA-based implementations might want
  * to return the {@code @Id} field at the first position always) and exclusion
@@ -29,23 +36,16 @@ import java.util.List;
  *
  * @author richter
  */
-/*
-internal implementation notes:
-- It's unlikely to avoid retrieving all fields in a superclass and then removing
-from them since that bloats up code complexity for the sake of saving a few
-comparisons - limited by a realistic number of class fields, i.e. most certainly
-below 50.
-*/
 public interface FieldRetriever {
 
     /**
      * Retrieves relevant fields of {@code clazz}.What that means (especially
- the order of the list or whether superclass' fields ought to be included)
- is up to the implementation.
+     * the order of the list or whether superclass' fields ought to be included)
+     * is up to the implementation.
      *
-     * @param clazz
+     * @param clazz the class to retrieve for
      * @return the list of relevant field as specified by implementation,
-     * never {@code null}
+     *     never {@code null}
      */
     /*
      internal implementation notes:

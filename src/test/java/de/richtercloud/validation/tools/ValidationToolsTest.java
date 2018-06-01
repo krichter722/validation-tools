@@ -50,9 +50,6 @@ import de.richtercloud.validation.tools.validator.Bean2Validator;
 public class ValidationToolsTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ValidationToolsTest.class);
 
-    /**
-     * Test of buildConstraintVioloationMessage method, of class ValidationTools.
-     */
     @Property
     public void testBuildConstraintVioloationMessage(@ForAll boolean bean2Null,
             @ForAll int bean2Property0,

@@ -14,14 +14,14 @@
  */
 package de.richtercloud.validation.tools.retriever;
 
-/**
- *
- * @author richter
- */
 /*
 internal implementation notes:
 - needs to be a proper class in order to have a constructor in reflection API
 */
+/**
+ *
+ * @author richter
+ */
 public class TestEntitySubclass extends TestEntity {
     private String b = "bb";
 
