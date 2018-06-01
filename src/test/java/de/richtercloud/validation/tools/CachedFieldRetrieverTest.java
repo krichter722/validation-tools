@@ -15,7 +15,6 @@
 
 package de.richtercloud.validation.tools;
 
-import de.richtercloud.validation.tools.CachedFieldRetriever;
 import de.richtercloud.validation.tools.retriever.TestEntitySubclass;
 import de.richtercloud.validation.tools.retriever.HierarchySubclass;
 import de.richtercloud.validation.tools.retriever.TestEntity;
