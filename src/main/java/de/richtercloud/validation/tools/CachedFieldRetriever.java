@@ -36,17 +36,6 @@ import de.richtercloud.validation.tools.annotations.Skip;
  */
 public class CachedFieldRetriever implements FieldRetriever {
 
-    public static List<Class<?>> generateInheritanceHierarchy(Class<?> entityClass) {
-        List<Class<?>> retValue = new LinkedList<>();
-        Class<?> hierarchyPointer = entityClass;
-        while (hierarchyPointer != null //Class.getSuperclass returns null for topmost interface
-                && !hierarchyPointer.equals(Object.class)) {
-            retValue.add(hierarchyPointer);
-            hierarchyPointer = hierarchyPointer.getSuperclass();
-        }
-        return retValue;
-    }
-
     /**
      * A cache for return values of {@link #retrieveRelevantFields(java.lang.Class)
      * }.
@@ -57,6 +46,17 @@ public class CachedFieldRetriever implements FieldRetriever {
      */
     private final Lock cacheLock = new ReentrantLock(true //fair
     );
+
+    public static List<Class<?>> generateInheritanceHierarchy(Class<?> entityClass) {
+        List<Class<?>> retValue = new LinkedList<>();
+        Class<?> hierarchyPointer = entityClass;
+        while (hierarchyPointer != null //Class.getSuperclass returns null for topmost interface
+                && !hierarchyPointer.equals(Object.class)) {
+            retValue.add(hierarchyPointer);
+            hierarchyPointer = hierarchyPointer.getSuperclass();
+        }
+        return retValue;
+    }
 
     /**
      * Recursively retrieves all fields from the inheritance hierachy of

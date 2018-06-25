@@ -31,7 +31,7 @@ import javax.validation.Path.Node;
  *
  * @author richter
  */
-public class ValidationTools {
+public final class ValidationTools {
 
     /**
      * Builds a useful message from multiple constraint violations
@@ -64,6 +64,9 @@ public class ValidationTools {
     `pathDescriptionMap == null`, but the use cases are just too different in
     order to be expressed by the same variable
     */
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops",
+        "PMD.AvoidDeeplyNestedIfStmts"
+        })
     public static <T> String buildConstraintVioloationMessage(Set<ConstraintViolation<T>> violations,
             Object instance,
             FieldRetriever fieldRetriever,
@@ -201,8 +204,7 @@ public class ValidationTools {
         }else if(outputMode == OutputMode.HTML_DIV) {
             messageBuilder.append("</div>");
         }
-        String message = messageBuilder.toString();
-        return message;
+        return messageBuilder.toString();
     }
 
     public static <T> String buildConstraintVioloationMessage(Set<ConstraintViolation<T>> violations,
@@ -211,14 +213,13 @@ public class ValidationTools {
             FieldNameLambda fieldNameLambda,
             boolean skipPathes,
             OutputMode outputMode) {
-        String retValue = buildConstraintVioloationMessage(violations,
+        return buildConstraintVioloationMessage(violations,
                 instance,
                 fieldRetriever,
                 new HashMap<>(), //pathDescriptionMap
                 fieldNameLambda,
                 skipPathes, //skipPathes
                 outputMode);
-        return retValue;
     }
 
     public static <T> String buildConstraintVioloationMessage(Set<ConstraintViolation<T>> violations,
@@ -226,14 +227,13 @@ public class ValidationTools {
             FieldRetriever fieldRetriever,
             FieldNameLambda fieldNameLambda,
             OutputMode outputMode) {
-        String retValue = buildConstraintVioloationMessage(violations,
+        return buildConstraintVioloationMessage(violations,
                 instance,
                 fieldRetriever,
                 new HashMap<>(), //pathDescriptionMap
                 fieldNameLambda,
                 false, //skipPathes
                 outputMode);
-        return retValue;
     }
 
     public static <T> String buildConstraintVioloationMessage(Set<ConstraintViolation<T>> violations,
@@ -241,28 +241,26 @@ public class ValidationTools {
             FieldRetriever fieldRetriever,
             Map<Path, String> pathDescriptionMap,
             OutputMode outputMode) {
-        String retValue = buildConstraintVioloationMessage(violations,
+        return buildConstraintVioloationMessage(violations,
                 instance,
                 fieldRetriever,
                 pathDescriptionMap,
             field -> field.getName(),
                 false, //skipPathes
                 outputMode);
-        return retValue;
     }
 
     public static <T> String buildConstraintVioloationMessage(Set<ConstraintViolation<T>> violations,
             Object instance,
             FieldRetriever fieldRetriever,
             OutputMode outputMode) {
-        String retValue = buildConstraintVioloationMessage(violations,
+        return buildConstraintVioloationMessage(violations,
                 instance,
                 fieldRetriever,
                 new HashMap<>(), //pathDescriptionMap
             field -> field.getName(),
                 false, //skipPathes
                 outputMode);
-        return retValue;
     }
 
     private ValidationTools() {
